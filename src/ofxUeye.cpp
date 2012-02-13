@@ -295,7 +295,11 @@ void ofxUeye::draw(float x, float y) {
 }
 
 void ofxUeye::draw(float x, float y, float w, float h) {
+	if (!useTexture)
+		return;
 
+	if (texture.isAllocated())
+		texture.draw(x, y, w, h);
 }
 
 float ofxUeye::getWidth() {
@@ -329,6 +333,13 @@ ofTexture& ofxUeye::getTextureReference() {
 
 void ofxUeye::setUseTexture(bool useTexture) {
 	this->useTexture = useTexture;
+
+	if (useTexture) {
+		if (this->isOpen())
+			this->texture.allocate(this->getWidth(), this->getHeight(), GL_LUMINANCE);
+	} else {
+		this->texture.clear();
+	}
 }
 //
 ////
@@ -339,5 +350,6 @@ void ofxUeye::setUseTexture(bool useTexture) {
 //
 void ofxUeye::allocatePixels(int width, int height) {
 	this->pixels.allocate(width, height, OF_PIXELS_MONO);
-	this->texture.allocate(width, height, GL_LUMINANCE);
+	if (useTexture)
+		this->texture.allocate(width, height, GL_LUMINANCE);
 }

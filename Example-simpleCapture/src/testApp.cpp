@@ -82,8 +82,8 @@ void testApp::draw(){
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
+	//update blocks the current thread whilst the capture is being performed
 	camera.update();
-
 }
 
 //--------------------------------------------------------------

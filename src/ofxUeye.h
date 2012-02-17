@@ -49,9 +49,9 @@ public:
 	static vector<ofxUeyeDevice> listDevices(); ///<list to console
 	static vector<ofxUeyeDevice> getDevices(); ///<list to vector
 
-	bool init(int deviceID=0);
+	bool init(int deviceID=0, int colorMode=IS_SET_CM_Y8);
 	bool init(const ofxUeyeDevice& device);
-	bool init(int width, int height, int deviceID=0); ///<init device and open
+	bool initGrabber(int width, int height, int deviceID=0); ///<init device and open
 	void close();
 	bool isOpen() const;
 	bool startFreeRunCapture();

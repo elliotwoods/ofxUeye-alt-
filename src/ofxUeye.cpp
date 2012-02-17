@@ -170,7 +170,7 @@ vector<ofxUeyeDevice> ofxUeye::getDevices() {
 
 ////
 //open/close device
-bool ofxUeye::init(int deviceID) {
+bool ofxUeye::init(int deviceID, int colorMode) {
 	close();
 	HIDS hCam = deviceID;
 
@@ -201,7 +201,7 @@ bool ofxUeye::init(int deviceID) {
 	is_GetSensorInfo(hCam, &sensor);
 	this->sensor = ofxUeyeSensor(sensor);
 
-	is_SetColorMode(hCam, IS_SET_CM_BAYER);	
+	is_SetColorMode(hCam, IS_SET_CM_Y8);	
 	allocatePixels(this->sensor.width, this->sensor.height);
 
 	is_AllocImageMem(hCam, this->sensor.width, this->sensor.height, 8, &data, &dataID);
@@ -211,7 +211,7 @@ bool ofxUeye::init(int deviceID) {
 	return true;
 }
 
-bool ofxUeye::init(int width, int height, int deviceID) {
+bool ofxUeye::initGrabber(int width, int height, int deviceID) {
 	if (!init(deviceID))
 		return false;
 	return open(width, height) && startFreeRunCapture();
@@ -350,6 +350,8 @@ void ofxUeye::setUseTexture(bool useTexture) {
 //
 void ofxUeye::allocatePixels(int width, int height) {
 	this->pixels.allocate(width, height, OF_PIXELS_MONO);
-	if (useTexture)
+	if (useTexture) {
 		this->texture.allocate(width, height, GL_LUMINANCE);
+		this->texture.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+	}
 }

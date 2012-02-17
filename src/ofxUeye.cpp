@@ -12,6 +12,10 @@
 //---------------------------------------------------------------
 //
 #pragma mark ofxUeyeDevice
+
+ofxUeyeDevice::ofxUeyeDevice() {
+}
+
 ofxUeyeDevice::ofxUeyeDevice(const UEYE_CAMERA_INFO& info) {
 	this->cameraID = info.dwCameraID;
 	this->deviceID = info.dwDeviceID;
@@ -19,7 +23,7 @@ ofxUeyeDevice::ofxUeyeDevice(const UEYE_CAMERA_INFO& info) {
 	this->isUse = info.dwInUse == (DWORD)1;
 	this->serial = string(info.SerNo);
 	this->model = string(info.Model);
-	this->status = info.dwStatus;
+	this->status = info.dwStatus; 
 }
 
 string ofxUeyeDevice::toString() const {

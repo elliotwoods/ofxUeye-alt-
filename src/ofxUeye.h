@@ -10,6 +10,7 @@
 #include "uEye.h"
 
 struct ofxUeyeDevice {
+	ofxUeyeDevice();
 	ofxUeyeDevice(const UEYE_CAMERA_INFO& info);
 	string toString() const;
 
@@ -91,7 +92,6 @@ public:
 
 protected:
 	HIDS cameraID;
-	char* data;
 	int dataID;
 	ofxUeyeSensor sensor;
 

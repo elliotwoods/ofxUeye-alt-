@@ -209,8 +209,8 @@ bool ofxUeye::init(int deviceID, int colorMode) {
 		this->color = false;
 	allocate();
 
-	is_AllocImageMem(hCam, this->sensor.width, this->sensor.height, this->color ? 24 : 8, &data, &dataID);
-	is_SetImageMem(hCam, data, dataID);
+	is_SetAllocatedImageMem(hCam, this->sensor.width, this->sensor.height, this->color ? 24 : 8, (char*) this->pixels.getPixels(), &dataID);
+	is_SetImageMem(hCam, (char*) this->pixels.getPixels(), dataID);
 	ofLogNotice() << "ofxUeye::init : Camera " << deviceID << " initialised successfully";
 
 	return true;
@@ -335,8 +335,7 @@ void ofxUeye::capture() {
 
 	is_FreezeVideo(cameraID, IS_WAIT);
 	int stride = this->getWidth() * (this->color ? 3 : 1);
-	if (this->useTexture)
-		pixels.setFromAlignedPixels((unsigned char*)data, this->getWidth(), this->getHeight(), color ? 3 : 1, stride);
+
 	if (this->useTexture)
 		texture.loadData(pixels);
 }

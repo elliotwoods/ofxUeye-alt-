@@ -63,6 +63,7 @@ public:
 
 	bool open(int width, int height);
 	float setOptimalCameraTiming(); ///<returns fps
+	void setPixelClock(int speedMHz);
 
 	void capture();
 
@@ -94,9 +95,10 @@ protected:
 	int dataID;
 	ofxUeyeSensor sensor;
 
-	void allocatePixels(int width, int height);
+	void allocate();
 	ofPixels pixels;
 	bool useTexture;
+	bool color;
 	ofTexture texture;
 
 	int maxClock;

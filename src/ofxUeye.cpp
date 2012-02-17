@@ -114,6 +114,7 @@ string ofxUeyeSensor::getColorMode() const {
 ofxUeye::ofxUeye() {
 	this->cameraID = 0;
 	this->useTexture = true;
+	this->color = false;
 }
 
 ofxUeye::~ofxUeye() {
@@ -201,10 +202,14 @@ bool ofxUeye::init(int deviceID, int colorMode) {
 	is_GetSensorInfo(hCam, &sensor);
 	this->sensor = ofxUeyeSensor(sensor);
 
-	is_SetColorMode(hCam, colorMode);	
-	allocatePixels(this->sensor.width, this->sensor.height);
+	is_SetColorMode(hCam, colorMode);
+	if (colorMode == IS_SET_CM_RGB8)
+		this->color = true;
+	else
+		this->color = false;
+	allocate();
 
-	is_AllocImageMem(hCam, this->sensor.width, this->sensor.height, 8, &data, &dataID);
+	is_AllocImageMem(hCam, this->sensor.width, this->sensor.height, this->color ? 24 : 8, &data, &dataID);
 	is_SetImageMem(hCam, data, dataID);
 	ofLogNotice() << "ofxUeye::init : Camera " << deviceID << " initialised successfully";
 
@@ -301,6 +306,25 @@ float ofxUeye::setOptimalCameraTiming() {
 	return fps;
 }
 
+void ofxUeye::setPixelClock(int speedMHz) {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setPixelClock : no device intialised, call ofxUeye::init first please";
+		return;
+	}
+
+	int error = is_SetPixelClock(this->cameraID, speedMHz);
+	
+	switch (error) {
+	case IS_NO_SUCCESS:
+		ofLogError() << "ofxUeye::setPixelClock failed";
+	case IS_INVALID_MODE:
+		ofLogError() << "ofxUeye::setPixelClock cannot be performed whilst in standby mode";
+	case IS_INVALID_PARAMETER:
+		ofLogError() << "ofxUeye::setPixelClock clock speed (" << speedMHz << ") is outside supported range for this camera";
+	}
+	return;
+}
+
 ////
 //capture
 void ofxUeye::capture() {
@@ -310,9 +334,9 @@ void ofxUeye::capture() {
 	}
 
 	is_FreezeVideo(cameraID, IS_WAIT);
-	int stride = this->getWidth();
+	int stride = this->getWidth() * (this->color ? 3 : 1);
 	if (this->useTexture)
-		pixels.setFromAlignedPixels((unsigned char*)data, this->getWidth(), this->getHeight(), 1, stride);
+		pixels.setFromAlignedPixels((unsigned char*)data, this->getWidth(), this->getHeight(), color ? 3 : 1, stride);
 	if (this->useTexture)
 		texture.loadData(pixels);
 }
@@ -367,7 +391,7 @@ void ofxUeye::setUseTexture(bool useTexture) {
 
 	if (useTexture) {
 		if (this->isOpen())
-			this->texture.allocate(this->getWidth(), this->getHeight(), GL_LUMINANCE);
+			this->allocate();
 	} else {
 		this->texture.clear();
 	}
@@ -379,10 +403,13 @@ void ofxUeye::setUseTexture(bool useTexture) {
 //protected
 ////
 //
-void ofxUeye::allocatePixels(int width, int height) {
-	this->pixels.allocate(width, height, OF_PIXELS_MONO);
+void ofxUeye::allocate() {
+	int width = this->sensor.width;
+	int height = this->sensor.height;
+
+	this->pixels.allocate(width, height, this->color ? OF_PIXELS_RGB : OF_PIXELS_MONO);
 	if (useTexture) {
-		this->texture.allocate(width, height, GL_LUMINANCE);
+		this->texture.allocate(width, height, this->color ? GL_RGB : GL_LUMINANCE);
 		this->texture.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 	}
 }

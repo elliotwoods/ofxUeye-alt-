@@ -57,7 +57,7 @@ void testApp::setup(){
 	//camera.init(640, 480);
 
 	//b. use specfic camera ID. uEye ID's start at 1
-	camera.init(1, IS_SET_CM_BAYER);
+	camera.init(1);
 
 	//c. use a specific device from the camera list
 	//camera.init(deviceList[0]);
@@ -108,6 +108,11 @@ void testApp::draw(){
 	drawString("[o] = optimise pixel clock (takes 4 seconds)", y);
 	drawString("[s] = toggle scale to window " + string(scaleToWindow ? "[x]" : "[ ]"), y);
 	drawString("[d] = toggle draw " + string(enableDraw ? "[x]" : "[ ]"), y);
+	drawString("[9] = set pixel clock speed to 96MHz", y);	
+	drawString("", y);
+	drawString("[m] = reinitialise in mono mode", y);	
+	drawString("[b] = reinitialise in bayer mode (colour cameras only)", y);	
+	drawString("[c] = reinitialise in colour mode (colour cameras only)", y);	
 }
 
 //--------------------------------------------------------------
@@ -125,6 +130,15 @@ void testApp::keyPressed(int key){
 		else
 			camera.setUseTexture(false);
 	}
+	if (key == '9')
+		camera.setPixelClock(96);
+
+	if (key == 'm')
+		camera.init(1, IS_SET_CM_Y8);
+	if (key == 'b')
+		camera.init(1, IS_SET_CM_BAYER);
+	if (key == 'c')
+		camera.init(1, IS_SET_CM_RGB8);
 }
 
 //--------------------------------------------------------------

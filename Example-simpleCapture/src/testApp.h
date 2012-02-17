@@ -21,4 +21,7 @@ public:
 	void gotMessage(ofMessage msg);
 
 	ofxUeye camera;
+	float maxFps; ///<returned from camera.setOptimalCameraTiming()
+	bool scaleToWindow;
+	bool enableDraw;
 };

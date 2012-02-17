@@ -62,6 +62,7 @@ public:
 	int getSensorHeight() const;
 
 	bool open(int width, int height);
+	float setOptimalCameraTiming(); ///<returns fps
 
 	void capture();
 
@@ -97,4 +98,6 @@ protected:
 	ofPixels pixels;
 	bool useTexture;
 	ofTexture texture;
+
+	int maxClock;
 };

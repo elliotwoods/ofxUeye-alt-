@@ -4,6 +4,9 @@
 void testApp::setup(){
 	
 	ofSetLogLevel(OF_LOG_NOTICE);
+	maxFps = 0.0f;
+	scaleToWindow = true;
+	enableDraw = true;
 
 	////
 	//NOTICE!
@@ -54,7 +57,7 @@ void testApp::setup(){
 	//camera.init(640, 480);
 
 	//b. use specfic camera ID. uEye ID's start at 1
-	camera.init(640, 480, 1);
+	camera.init(1, IS_SET_CM_BAYER);
 
 	//c. use a specific device from the camera list
 	//camera.init(deviceList[0]);
@@ -73,17 +76,55 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::update(){
+	//update blocks the current thread whilst the capture is being performed
+	//best to double buffer it against an image processing thread
+	camera.update();
 }
 
 //--------------------------------------------------------------
+
+void drawString(string text, int& y) {
+	ofPushStyle();
+	ofSetColor(200, 100, 100);
+	ofRect(10, y-15, text.length() * 8 + 10, 20);
+	ofSetColor(255);
+	ofDrawBitmapString(text, 15, y);
+	ofPopStyle();
+	y+=20;
+}
+
 void testApp::draw(){
-	camera.draw(0, 0);
+	if (scaleToWindow)
+		camera.draw(0, 0, ofGetWidth(), ofGetHeight());
+	else
+		camera.draw(0, 0);
+
+	int y = 20; //increments automatically
+	drawString(string("app fps = ") + ofToString(ofGetFrameRate(), 1), y);
+	drawString(string("max camera fps = ") + ofToString(maxFps, 1), y);
+	drawString("resolution = " + ofToString(camera.getWidth(),0) + "x" + ofToString(camera.getHeight(),0), y);
+	drawString("", y);
+	drawString("[f] = fullscreen", y);
+	drawString("[o] = optimise pixel clock (takes 4 seconds)", y);
+	drawString("[s] = toggle scale to window " + string(scaleToWindow ? "[x]" : "[ ]"), y);
+	drawString("[d] = toggle draw " + string(enableDraw ? "[x]" : "[ ]"), y);
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-	//update blocks the current thread whilst the capture is being performed
-	camera.update();
+	if (key == 'f')
+		ofToggleFullscreen();
+	if (key == 'o') 
+		maxFps = camera.setOptimalCameraTiming();
+	if (key == 's')
+		scaleToWindow ^= true;
+	if (key == 'd') {
+		enableDraw ^= true;
+		if (enableDraw)
+			camera.setUseTexture(true);
+		else
+			camera.setUseTexture(false);
+	}
 }
 
 //--------------------------------------------------------------

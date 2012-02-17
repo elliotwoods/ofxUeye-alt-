@@ -201,7 +201,7 @@ bool ofxUeye::init(int deviceID, int colorMode) {
 	is_GetSensorInfo(hCam, &sensor);
 	this->sensor = ofxUeyeSensor(sensor);
 
-	is_SetColorMode(hCam, IS_SET_CM_Y8);	
+	is_SetColorMode(hCam, colorMode);	
 	allocatePixels(this->sensor.width, this->sensor.height);
 
 	is_AllocImageMem(hCam, this->sensor.width, this->sensor.height, 8, &data, &dataID);
@@ -269,7 +269,36 @@ bool ofxUeye::open(int width, int height) {
 		ofLogError() << "ofxUeye::open : cannot open device before it is initialised, call ofxUeye::init first please";
 		return false;
 	}
+	ofSystemAlertDialog("ofxUeye does not currently support non-native resolution. Please avoid init or open that requires a specific resolution");
 	return true;
+}
+
+float ofxUeye::setOptimalCameraTiming() {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setOptimalCameraTiming : no device intialised, call ofxUeye::init first please";
+		return 0.0f;
+	}
+
+	double fps;
+	int error = is_SetOptimalCameraTiming(this->cameraID, IS_BEST_PCLK_RUN_ONCE, 4000, &maxClock, &fps);
+
+	switch (error) {
+	case IS_SUCCESS:
+		return fps;
+	case IS_NO_SUCCESS:
+		ofLogError() << "ofxUeye::setOptimalCameraTiming failed";
+		return 0;
+	case IS_AUTO_EXPOSURE_RUNNING:
+		ofLogError() << "ofxUeye::setOptimalCameraTiming cannot be performed whilst auto exposure is running";
+		return 0;
+	case IS_INVALID_PARAMETER:
+		ofLogError() << "ofxUeye::setOptimalCameraTiming timeout parameter is invalid";
+		return 0;
+	case IS_TRIGGER_ACTIVATED:
+		ofLogError() << "ofxUeye::setOptimalCameraTiming cannot be performed in trigger mode";
+		return 0;
+	}
+	return fps;
 }
 
 ////
@@ -282,8 +311,10 @@ void ofxUeye::capture() {
 
 	is_FreezeVideo(cameraID, IS_WAIT);
 	int stride = this->getWidth();
-	pixels.setFromAlignedPixels((unsigned char*)data, this->getWidth(), this->getHeight(), 1, stride);
-	texture.loadData(pixels);
+	if (this->useTexture)
+		pixels.setFromAlignedPixels((unsigned char*)data, this->getWidth(), this->getHeight(), 1, stride);
+	if (this->useTexture)
+		texture.loadData(pixels);
 }
 
 ////

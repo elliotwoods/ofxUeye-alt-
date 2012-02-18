@@ -48,7 +48,7 @@ public:
 	ofxUeye();
 	~ofxUeye();
 	static vector<ofxUeyeDevice> listDevices(); ///<list to console
-	static vector<ofxUeyeDevice> getDevices(); ///<list to vector
+	static vector<ofxUeyeDevice> getDeviceList(); ///<list to vector
 
 	bool init(int deviceID=0, int colorMode=IS_SET_CM_Y8);
 	bool init(const ofxUeyeDevice& device);

@@ -129,7 +129,7 @@ ofxUeye::~ofxUeye() {
 //list devices
 
 vector<ofxUeyeDevice> ofxUeye::listDevices() {
-	const vector<ofxUeyeDevice> devices = ofxUeye::getDevices();
+	const vector<ofxUeyeDevice> devices = ofxUeye::getDeviceList();
 
 	cout << "////" << endl;
 	cout << "//ofxUeye::listDevices (" << devices.size() << " found)" << endl;
@@ -144,7 +144,7 @@ vector<ofxUeyeDevice> ofxUeye::listDevices() {
 	return devices;
 }
 
-vector<ofxUeyeDevice> ofxUeye::getDevices() {
+vector<ofxUeyeDevice> ofxUeye::getDeviceList() {
 	vector<ofxUeyeDevice> devices;
 	int cameraCount;
 	UEYE_CAMERA_LIST* list = 0;

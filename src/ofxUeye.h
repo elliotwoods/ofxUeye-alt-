@@ -50,7 +50,7 @@ public:
 	static vector<ofxUeyeDevice> listDevices(); ///<list to console
 	static vector<ofxUeyeDevice> getDeviceList(); ///<list to vector
 
-	bool init(int deviceID=0, int colorMode=IS_SET_CM_Y8);
+	bool init(int deviceID=0, bool useCameraID=false, int colorMode=IS_SET_CM_Y8);
 	bool init(const ofxUeyeDevice& device);
 	bool initGrabber(int width, int height, int deviceID=0); ///<init device and open
 	void close();
@@ -65,6 +65,8 @@ public:
 	bool open(int width, int height);
 	float setOptimalCameraTiming(); ///<returns fps
 	void setPixelClock(int speedMHz);
+	void setGain(float gain); //set gain as a percentage
+	void setExposure(float exposure);
 
 	void capture();
 

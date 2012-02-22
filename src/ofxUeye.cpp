@@ -175,9 +175,10 @@ vector<ofxUeyeDevice> ofxUeye::getDeviceList() {
 
 ////
 //open/close device
-bool ofxUeye::init(int deviceID, int colorMode) {
+bool ofxUeye::init(int deviceID, bool useCameraID, int colorMode) {
 	close();
-	HIDS hCam = deviceID;
+	HIDS hCam = useCameraID ? deviceID : MAX(deviceID, 0) + 1001 | IS_USE_DEVICE_ID;
+	ofLogNotice() << "ofxUeye::init Opening camera with device ID " << deviceID;
 
 	int nRet = is_InitCamera(&hCam, NULL);
 
@@ -227,7 +228,7 @@ bool ofxUeye::initGrabber(int width, int height, int deviceID) {
 }
 
 bool ofxUeye::init(const ofxUeyeDevice& device) {
-	return init(device.cameraID);
+	return init(device.cameraID, true);
 }
 
 void ofxUeye::close() {
@@ -329,6 +330,26 @@ void ofxUeye::setPixelClock(int speedMHz) {
 	return;
 }
 
+void ofxUeye::setGain(float gain) {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setGain: no device intialised, call ofxUeye::init first please";
+		return;
+	}
+
+	int parameter = gain * 100.0f;
+	is_SetHWGainFactor(this->cameraID, gain, parameter);
+}
+
+void ofxUeye::setExposure(float gain) {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setExposure: no device intialised, call ofxUeye::init first please";
+		return;
+	}
+
+	double parameter = gain;
+
+	is_Exposure(this->cameraID, IS_EXPOSURE_CMD_SET_EXPOSURE, &parameter, sizeof(parameter));
+}
 ////
 //capture
 void ofxUeye::capture() {

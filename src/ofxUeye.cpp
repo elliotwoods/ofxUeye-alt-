@@ -119,6 +119,7 @@ ofxUeye::ofxUeye() {
 	this->cameraID = 0;
 	this->useTexture = true;
 	this->color = false;
+	this->open = false;
 }
 
 ofxUeye::~ofxUeye() {
@@ -175,10 +176,10 @@ vector<ofxUeyeDevice> ofxUeye::getDeviceList() {
 
 ////
 //open/close device
-bool ofxUeye::init(int deviceID, bool useCameraID, int colorMode) {
+bool ofxUeye::init(int cameraOrDeviceID, bool useCameraID, int colorMode) {
 	close();
-	HIDS hCam = useCameraID ? deviceID : MAX(deviceID, 0) + 1001 | IS_USE_DEVICE_ID;
-	ofLogNotice() << "ofxUeye::init Opening camera with device ID " << deviceID;
+	HIDS hCam = useCameraID ? cameraOrDeviceID : MAX(cameraOrDeviceID, 0) + 1001 | IS_USE_DEVICE_ID;
+	ofLogNotice() << "ofxUeye::init Opening camera with " << (useCameraID ? "camera ID " : "device ID ") << cameraOrDeviceID;
 
 	int nRet = is_InitCamera(&hCam, NULL);
 
@@ -191,22 +192,34 @@ bool ofxUeye::init(int deviceID, bool useCameraID, int colorMode) {
 		is_GetDuration(hCam, IS_SE_STARTER_FW_UPLOAD, &timeNeeded);
 
 		ofLogNotice() << "ofxUeye::init : Updating camera firmware, wait " << timeNeeded << " seconds.";
-		hCam = (HIDS) (((INT)hCam) | IS_ALLOW_STARTER_FW_UPLOAD); 
+		int upload = (HIDS) (((INT)hCam) | IS_ALLOW_STARTER_FW_UPLOAD); 
 		nRet = is_InitCamera(&hCam, NULL);		
 	}
 	//
 	////
 
-	if (nRet == IS_NO_SUCCESS) {
-		ofLogError() << "ofxUeye::init(" << deviceID <<") failed to init camera";
+	if (nRet != IS_SUCCESS) {
+		ofLogError() << "ofxUeye::init(" << cameraOrDeviceID <<") failed to init camera";
+		this->open = false;
 		return false;
 	}
 
-	cameraID = hCam;
+	this->hCam = hCam;
+	
+	if (!useCameraID) {
+		CAMINFO camera;
+		is_GetCameraInfo(hCam, &camera);
+		this->cameraID = (int)camera.Select;
+		this->deviceID = cameraOrDeviceID;
+	} else {
+		this->cameraID = cameraOrDeviceID;
+		this->deviceID = -1;
+	}
+
 	SENSORINFO sensor;
 	is_GetSensorInfo(hCam, &sensor);
 	this->sensor = ofxUeyeSensor(sensor);
-
+	
 	is_SetColorMode(hCam, colorMode);
 	if (colorMode == IS_SET_CM_RGB8)
 		this->color = true;
@@ -216,15 +229,11 @@ bool ofxUeye::init(int deviceID, bool useCameraID, int colorMode) {
 
 	is_SetAllocatedImageMem(hCam, this->sensor.width, this->sensor.height, this->color ? 24 : 8, (char*) this->pixels.getPixels(), &dataID);
 	is_SetImageMem(hCam, (char*) this->pixels.getPixels(), dataID);
-	ofLogNotice() << "ofxUeye::init : Camera " << deviceID << " initialised successfully";
+	ofLogNotice() << "ofxUeye::init : Camera " << cameraOrDeviceID << " initialised successfully.";
+
+	this->open = true;
 
 	return true;
-}
-
-bool ofxUeye::initGrabber(int width, int height, int deviceID) {
-	if (!init(deviceID))
-		return false;
-	return open(width, height) && startFreeRunCapture();
 }
 
 bool ofxUeye::init(const ofxUeyeDevice& device) {
@@ -234,13 +243,13 @@ bool ofxUeye::init(const ofxUeyeDevice& device) {
 void ofxUeye::close() {
 	if (!this->isOpen())
 		return;
-	ofLogNotice() << "ofxUeye::close : closing camera " << cameraID;
-	is_ExitCamera(cameraID);
-	cameraID = 0;
+	ofLogNotice() << "ofxUeye::close : closing camera " << hCam;
+	is_ExitCamera(hCam);
+	this->open = false;
 }
 
 bool ofxUeye::isOpen() const {
-	return cameraID != 0;
+	return this->open;
 }
 
 bool ofxUeye::startFreeRunCapture() {
@@ -249,7 +258,7 @@ bool ofxUeye::startFreeRunCapture() {
 		return false;
 	}
 
-	return is_CaptureVideo(cameraID, IS_DONT_WAIT) == IS_SUCCESS;
+	return is_CaptureVideo(hCam, IS_DONT_WAIT) == IS_SUCCESS;
 }
 
 void ofxUeye::stopFreeRunCapture() {
@@ -258,6 +267,19 @@ void ofxUeye::stopFreeRunCapture() {
 		return;
 	}
 }
+
+////
+//identity
+int ofxUeye::getCameraID() const {
+	return this->cameraID;
+}
+
+int ofxUeye::getDeviceID() const {
+	if (this->deviceID == -1)
+		ofLogWarning("ofxUeye") << "Camera was not initialised with device ID, so device ID is not known";
+	return this->deviceID;
+}
+
 ////
 //sensor
 const ofxUeyeSensor& ofxUeye::getSensor() const {
@@ -274,15 +296,6 @@ int ofxUeye::getSensorHeight() const {
 
 ////
 //set properties
-bool ofxUeye::open(int width, int height) {
-	if (!this->isOpen()) {
-		ofLogError() << "ofxUeye::open : cannot open device before it is initialised, call ofxUeye::init first please";
-		return false;
-	}
-	ofSystemAlertDialog("ofxUeye does not currently support non-native resolution. Please avoid init or open that requires a specific resolution");
-	return true;
-}
-
 float ofxUeye::setOptimalCameraTiming() {
 	if (!this->isOpen()) {
 		ofLogError() << "ofxUeye::setOptimalCameraTiming : no device intialised, call ofxUeye::init first please";
@@ -340,29 +353,61 @@ void ofxUeye::setGain(float gain) {
 	is_SetHWGainFactor(this->cameraID, gain, parameter);
 }
 
-void ofxUeye::setExposure(float gain) {
+void ofxUeye::setExposure(float exposure) {
 	if (!this->isOpen()) {
 		ofLogError() << "ofxUeye::setExposure: no device intialised, call ofxUeye::init first please";
 		return;
 	}
 
-	double parameter = gain;
-
+	//just to note. the old 'obsolete' IDS function was sensible
+	//this one is simply stupid. IDS have fucking idiots in their SDK team
+	
+	//first we check whether fine shutter is supported
+	double parameter = exposure;
 	is_Exposure(this->cameraID, IS_EXPOSURE_CMD_SET_EXPOSURE, &parameter, sizeof(parameter));
 }
-////
-//capture
-void ofxUeye::capture() {
-	if (!isOpen()) {
-		ofLogError() << "ofxUeye::capture : cannot capture as device is not open";
+
+void ofxUeye::setHWGamma(bool enabled) {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setHWGamma: no device intialised, call ofxUeye::init first please";
 		return;
 	}
 
-	is_FreezeVideo(cameraID, IS_WAIT);
-	int stride = this->getWidth() * (this->color ? 3 : 1);
+	is_SetHardwareGamma(this->cameraID, enabled ? IS_SET_HW_GAMMA_ON : IS_SET_HW_GAMMA_OFF);
+}
 
+void ofxUeye::setGamma(float gamma) {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setGamma: no device intialised, call ofxUeye::init first please";
+		return;
+	}
+
+	is_SetGamma(this->cameraID, gamma * 100.0f);
+}
+////
+//capture
+bool ofxUeye::capture() {
+	if (!isOpen()) {
+		ofLogError() << "ofxUeye::capture : cannot capture as device is not open";
+		return false;
+	}
+
+	int error = is_FreezeVideo(hCam, IS_WAIT);
+	switch(error) {
+	case IS_NO_SUCCESS:
+		ofLogError("ofxUeye") << "capture on camera ID " << cameraID << " failed";
+		break;
+	case IS_TRANSFER_ERROR:
+		ofLogWarning("ofxUeye") << "transfer error on capture on camera ID " << cameraID;
+		break;
+	case IS_CAPTURE_RUNNING:
+		ofLogWarning("ofxUeye") << "cannot capture on camera ID " << cameraID << " as another capture is already in progress";
+		break;
+	}
 	if (this->useTexture)
 		texture.loadData(pixels);
+
+	return error == IS_SUCCESS;
 }
 
 ////

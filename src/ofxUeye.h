@@ -43,6 +43,12 @@ struct ofxUeyeSensor {
 	float pixelSize; ///< size of pixel in meters
 };
 
+class ofxUeye;
+class ofxUeyePreset {
+public:
+	virtual void apply(ofxUeye& camera) const = 0;
+};
+
 class ofxUeye : public ofBaseVideoDraws {
 public:
 	ofxUeye();
@@ -50,25 +56,28 @@ public:
 	static vector<ofxUeyeDevice> listDevices(); ///<list to console
 	static vector<ofxUeyeDevice> getDeviceList(); ///<list to vector
 
-	bool init(int deviceID=0, bool useCameraID=false, int colorMode=IS_SET_CM_Y8);
+	bool init(int cameraOrDeviceID=0, bool useCameraID=false, int colorMode=IS_SET_CM_Y8);
 	bool init(const ofxUeyeDevice& device);
-	bool initGrabber(int width, int height, int deviceID=0); ///<init device and open
 	void close();
 	bool isOpen() const;
 	bool startFreeRunCapture();
 	void stopFreeRunCapture();
 
+	int getCameraID() const;
+	int getDeviceID() const;
+
 	const ofxUeyeSensor& getSensor() const;
 	int getSensorWidth() const;
 	int getSensorHeight() const;
 
-	bool open(int width, int height);
 	float setOptimalCameraTiming(); ///<returns fps
 	void setPixelClock(int speedMHz);
 	void setGain(float gain); //set gain as a percentage
-	void setExposure(float exposure);
+	void setExposure(float exposure); //presume in ms
+	void setHWGamma(bool enabled);
+	void setGamma(float gamma);
 
-	void capture();
+	bool capture();
 
 	////
 	//ofBaseVideoDraws
@@ -93,8 +102,11 @@ public:
 	////
 
 protected:
-	HIDS cameraID;
-	int dataID;
+	HIDS hCam;
+	int deviceID;
+	int cameraID;
+	int dataID; ///<ID of memory area for captures
+	bool open;
 	ofxUeyeSensor sensor;
 
 	void allocate();

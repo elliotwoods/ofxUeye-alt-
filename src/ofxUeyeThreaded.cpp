@@ -25,8 +25,10 @@ bool ofxUeyeThreaded::init(const ofxUeyeDevice& device) {
 	close();
 	if (!camera.init(device))
 		return false;
-	else
+	else {
 		initBase();
+		return true;
+	}
 }
 
 void ofxUeyeThreaded::initBase() {

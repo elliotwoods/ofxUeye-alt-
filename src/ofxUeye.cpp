@@ -303,7 +303,7 @@ float ofxUeye::setOptimalCameraTiming() {
 	}
 
 	double fps;
-	int error = is_SetOptimalCameraTiming(this->cameraID, IS_BEST_PCLK_RUN_ONCE, 4000, &maxClock, &fps);
+	int error = is_SetOptimalCameraTiming(this->hCam, IS_BEST_PCLK_RUN_ONCE, 4000, &maxClock, &fps);
 
 	switch (error) {
 	case IS_SUCCESS:
@@ -330,7 +330,7 @@ void ofxUeye::setPixelClock(int speedMHz) {
 		return;
 	}
 
-	int error = is_SetPixelClock(this->cameraID, speedMHz);
+	int error = is_SetPixelClock(this->hCam, speedMHz);
 	
 	switch (error) {
 	case IS_NO_SUCCESS:
@@ -343,6 +343,15 @@ void ofxUeye::setPixelClock(int speedMHz) {
 	return;
 }
 
+int ofxUeye::getPixelClock() const {
+	if (!this->isOpen()) {
+		ofLogError("ofxUeye") << "getPixelClock: no device intialised, call ofxUeye::init first please";
+		return 0;
+	}
+
+	return is_SetPixelClock(this->hCam, IS_GET_PIXEL_CLOCK);
+}
+
 void ofxUeye::setGain(float gain) {
 	if (!this->isOpen()) {
 		ofLogError() << "ofxUeye::setGain: no device intialised, call ofxUeye::init first please";
@@ -350,7 +359,7 @@ void ofxUeye::setGain(float gain) {
 	}
 
 	int parameter = gain * 100.0f;
-	is_SetHWGainFactor(this->cameraID, gain, parameter);
+	is_SetHWGainFactor(this->hCam, gain, parameter);
 }
 
 void ofxUeye::setExposure(float exposure) {
@@ -364,7 +373,7 @@ void ofxUeye::setExposure(float exposure) {
 	
 	//first we check whether fine shutter is supported
 	double parameter = exposure;
-	is_Exposure(this->cameraID, IS_EXPOSURE_CMD_SET_EXPOSURE, &parameter, sizeof(parameter));
+	is_Exposure(this->hCam, IS_EXPOSURE_CMD_SET_EXPOSURE, &parameter, sizeof(parameter));
 }
 
 void ofxUeye::setHWGamma(bool enabled) {
@@ -373,7 +382,7 @@ void ofxUeye::setHWGamma(bool enabled) {
 		return;
 	}
 
-	is_SetHardwareGamma(this->cameraID, enabled ? IS_SET_HW_GAMMA_ON : IS_SET_HW_GAMMA_OFF);
+	is_SetHardwareGamma(this->hCam, enabled ? IS_SET_HW_GAMMA_ON : IS_SET_HW_GAMMA_OFF);
 }
 
 void ofxUeye::setGamma(float gamma) {
@@ -382,7 +391,7 @@ void ofxUeye::setGamma(float gamma) {
 		return;
 	}
 
-	is_SetGamma(this->cameraID, gamma * 100.0f);
+	is_SetGamma(this->hCam, gamma * 100.0f);
 }
 ////
 //capture

@@ -72,6 +72,8 @@ public:
 
 	float setOptimalCameraTiming(); ///<returns fps
 	void setPixelClock(int speedMHz);
+	int getPixelClock() const;
+
 	void setGain(float gain); //set gain as a percentage
 	void setExposure(float exposure); //presume in ms
 	void setHWGamma(bool enabled);

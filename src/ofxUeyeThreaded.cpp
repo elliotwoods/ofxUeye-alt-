@@ -115,6 +115,10 @@ ofxUeye& ofxUeyeThreaded::getCamera() {
 	return this->camera;
 }
 
+const ofxUeye& ofxUeyeThreaded::getCamera() const {
+	return this->camera;
+}
+
 void ofxUeyeThreaded::apply(const ofxUeyePreset& preset) {
 	preset.apply(this->getCamera());
 }

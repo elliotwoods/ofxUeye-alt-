@@ -13,6 +13,7 @@ public:
 	void copyPixelsTo(ofPixels& pixels);
 	
 	ofxUeye& getCamera();
+	const ofxUeye& getCamera() const;
 	void apply(const ofxUeyePreset& preset);
 	void getFreshFrame(); ///<for when you absolutely need a new frame, e.g. structured light
 	ofPixels getFreshFrameCopy(); ///<capture the fresh frame and return a copy

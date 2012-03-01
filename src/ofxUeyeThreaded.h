@@ -18,6 +18,8 @@ public:
 	void getFreshFrame(); ///<for when you absolutely need a new frame, e.g. structured light
 	ofPixels getFreshFrameCopy(); ///<capture the fresh frame and return a copy
 
+	void setThreadPaused(bool paused);
+
 	////
 	//ofBaseVideoDraws
 	////
@@ -56,4 +58,6 @@ protected:
 	float width, height;
 	bool frameNew;
 	bool frameNewAtUpdate;
+
+	bool threadPaused;
 };

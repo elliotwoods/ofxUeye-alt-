@@ -6,8 +6,15 @@
 //	http://www.kimchiandchips.com
 //
 #pragma once
-#include "ofMain.h"
+#include "ofTexture.h"
+#include "ofPixels.h"
+#include "ofAppRunner.h"
+
 #include "uEye.h"
+
+#include <string>
+
+using namespace std;
 
 struct ofxUeyeDevice {
 	ofxUeyeDevice();

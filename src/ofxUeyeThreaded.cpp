@@ -5,6 +5,7 @@ ofxUeyeThreaded::ofxUeyeThreaded() {
 	this->height = 0;
 	this->frameNew = false;
 	this->useTexture = true;
+	this->threadPaused = false;
 }
 
 ofxUeyeThreaded::~ofxUeyeThreaded() {
@@ -94,7 +95,10 @@ ofPixels& ofxUeyeThreaded::getPixelsRef() {
 ofPixels ofxUeyeThreaded::getPixelsCopy() {
 	ofPixels buffer;
 	this->copyPixelsTo(buffer);
-	return buffer;
+	if (buffer.isAllocated())
+		return buffer;
+	else
+		return ofPixels();
 }
 
 bool ofxUeyeThreaded::isFrameNew() {
@@ -138,14 +142,20 @@ ofPixels ofxUeyeThreaded::getFreshFrameCopy() {
 	return copy;
 }
 
+void ofxUeyeThreaded::setThreadPaused(bool threadPaused) {
+	this->threadPaused = threadPaused;
+}
+
 void ofxUeyeThreaded::threadedFunction() {
 	while (this->isThreadRunning()) {
+		ofSleepMillis(1);
+		if (this->threadPaused)
+			continue;
 		if (!camera.capture())
 			continue;
 		lock();
 		pixels = camera.getPixelsRef();
 		frameNew = true;
 		unlock();
-		ofSleepMillis(1);
 	}
 }

@@ -7,7 +7,7 @@ public:
 	ofxUeyeThreaded();
 	~ofxUeyeThreaded();
 	bool init(int deviceOrCameraID=0, bool useCameraID=false, int colorMode=IS_SET_CM_Y8);
-	bool init(const ofxUeyeDevice& device);
+	bool init(const ofxUeyeDevice& device, int colorMode=IS_SET_CM_Y8);
 
 	void close();
 	void copyPixelsTo(ofPixels& pixels);
@@ -17,7 +17,7 @@ public:
 	void apply(const ofxUeyePreset& preset);
 	void getFreshFrame(); ///<for when you absolutely need a new frame, e.g. structured light
 	ofPixels getFreshFrameCopy(); ///<capture the fresh frame and return a copy
-
+	void getFreshFrameCopyTo(ofPixels& pixels);
 	void setThreadPaused(bool paused);
 
 	////

@@ -236,8 +236,8 @@ bool ofxUeye::init(int cameraOrDeviceID, bool useCameraID, int colorMode) {
 	return true;
 }
 
-bool ofxUeye::init(const ofxUeyeDevice& device) {
-	return init(device.cameraID, true);
+bool ofxUeye::init(const ofxUeyeDevice& device, int colorMode) {
+	return init(device.cameraID, true, colorMode);
 }
 
 void ofxUeye::close() {

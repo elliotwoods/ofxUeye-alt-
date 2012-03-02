@@ -64,7 +64,7 @@ public:
 	static vector<ofxUeyeDevice> getDeviceList(); ///<list to vector
 
 	bool init(int cameraOrDeviceID=0, bool useCameraID=false, int colorMode=IS_SET_CM_Y8);
-	bool init(const ofxUeyeDevice& device);
+	bool init(const ofxUeyeDevice& device, int colorMode=IS_SET_CM_Y8);
 	void close();
 	bool isOpen() const;
 	bool startFreeRunCapture();

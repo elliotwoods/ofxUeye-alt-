@@ -14,7 +14,7 @@ ofxUeyeThreaded::~ofxUeyeThreaded() {
 
 bool ofxUeyeThreaded::init(int deviceOrCameraID, bool useCameraID, int colorMode) {
 	close();
-	if (!camera.init(deviceOrCameraID, useCameraID))
+	if (!camera.init(deviceOrCameraID, useCameraID, colorMode))
 		return false;
 	else {
 		initBase();
@@ -22,9 +22,9 @@ bool ofxUeyeThreaded::init(int deviceOrCameraID, bool useCameraID, int colorMode
 	}
 }
 
-bool ofxUeyeThreaded::init(const ofxUeyeDevice& device) {
+bool ofxUeyeThreaded::init(const ofxUeyeDevice& device, int colorMode) {
 	close();
-	if (!camera.init(device))
+	if (!camera.init(device, colorMode))
 		return false;
 	else {
 		initBase();
@@ -128,19 +128,27 @@ void ofxUeyeThreaded::apply(const ofxUeyePreset& preset) {
 }
 
 void ofxUeyeThreaded::getFreshFrame() {
-	lock();
 	camera.capture();
+	lock();
 	pixels = camera.getPixelsRef();
 	unlock();
 }
 
 ofPixels ofxUeyeThreaded::getFreshFrameCopy() {
-	lock();
 	camera.capture();
+	lock();
 	ofPixels copy = camera.getPixelsRef();
 	unlock();
 	return copy;
 }
+
+void ofxUeyeThreaded::getFreshFrameCopyTo(ofPixels& pixels) {
+	camera.capture();
+	lock();
+	pixels = camera.getPixelsRef();
+	unlock();
+}
+
 
 void ofxUeyeThreaded::setThreadPaused(bool threadPaused) {
 	this->threadPaused = threadPaused;

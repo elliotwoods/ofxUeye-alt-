@@ -358,6 +358,10 @@ void ofxUeye::setGain(float gain) {
 		return;
 	}
 
+	//disable auto exposure
+	double pval1 = 0;
+	is_SetAutoParameter(this->hCam, IS_SET_ENABLE_AUTO_GAIN, &pval1, 0);
+
 	int parameter = gain * 100.0f;
 	is_SetHWGainFactor(this->hCam, IS_GET_MASTER_GAIN_FACTOR, parameter);
 }
@@ -366,10 +370,21 @@ void ofxUeye::setExposure(float exposure) {
 	if (!this->isOpen()) {
 		ofLogError() << "ofxUeye::setExposure: no device intialised, call ofxUeye::init first please";
 		return;
-	}	
-	//first we check whether fine shutter is supported
-	double parameter = exposure;
-	is_Exposure(this->hCam, IS_EXPOSURE_CMD_SET_EXPOSURE, &parameter, sizeof(parameter));
+	}
+
+	this->setAutoExposure(false);
+
+	double range[3];
+	is_Exposure(this->hCam, IS_EXPOSURE_CMD_GET_EXPOSURE_RANGE, range, sizeof(range));
+	int position = ( (double) exposure - range[0]) / range[2];
+
+	double parameter = range[0] + range[2] * position;
+	int error = is_Exposure(this->hCam, IS_EXPOSURE_CMD_SET_EXPOSURE, (void*) &parameter, sizeof(parameter));
+	if (error != IS_SUCCESS) {
+		ofLogError("ofxUeye") << "setExposure(" << parameter << "): failed";
+	} else {
+		ofLogNotice("ofxUeye") << "setExposure(" << parameter << "): success";
+	}
 }
 
 void ofxUeye::setHWGamma(bool enabled) {
@@ -388,6 +403,75 @@ void ofxUeye::setGamma(float gamma) {
 	}
 
 	is_SetGamma(this->hCam, gamma * 100.0f);
+}
+
+void ofxUeye::setAutoExposure(bool autoExposure) {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setAutoExposure: no device intialised, call ofxUeye::init first please";
+		return;
+	}
+	//disable auto exposure
+	double pval1 = autoExposure ? 1 : 0;
+	int error = is_SetAutoParameter(this->hCam, IS_SET_ENABLE_AUTO_SHUTTER, &pval1, 0);
+	if (error != IS_SUCCESS) {
+		ofLogError("ofxUeye") << "setAutoExposure: failed";
+	}
+}
+
+void ofxUeye::setAutoGain(bool autoGain) {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::setAutoGain: no device intialised, call ofxUeye::init first please";
+		return;
+	}
+	//disable auto exposure
+	double pval1 = autoGain ? 1 : 0;
+	is_SetAutoParameter(this->hCam, IS_SET_ENABLE_AUTO_GAIN, &pval1, 0);
+}
+
+float ofxUeye::getGain() {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::getGain: no device intialised, call ofxUeye::init first please";
+		return 0.0f;
+	}
+
+	return (float)is_SetHWGainFactor(this->hCam, IS_GET_MASTER_GAIN, 0) / 100.0f;
+}
+
+float ofxUeye::getExposure() {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::getExposure: no device intialised, call ofxUeye::init first please";
+		return 0.0f;
+	}
+
+	double value;
+	is_Exposure(this->hCam, IS_EXPOSURE_CMD_GET_EXPOSURE, &value, sizeof(value));
+	return (float)value;
+}
+
+bool ofxUeye::getAutoExposure() {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::getAutoExposure: no device intialised, call ofxUeye::init first please";
+		return false;
+	}
+
+	double value;
+	is_SetAutoParameter(this->hCam, IS_GET_ENABLE_AUTO_SHUTTER, &value, 0);
+	return value == 1.0;
+}
+
+bool ofxUeye::getAutoGain() {
+	if (!this->isOpen()) {
+		ofLogError() << "ofxUeye::getAutoGain: no device intialised, call ofxUeye::init first please";
+		return false;
+	}
+
+	double value;
+	is_SetAutoParameter(this->hCam, IS_GET_ENABLE_AUTO_GAIN, &value, 0);
+	return value == 1.0;
+}
+
+HIDS ofxUeye::getCameraHandle() const {
+	return this->hCam;
 }
 ////
 //capture

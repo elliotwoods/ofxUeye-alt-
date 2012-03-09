@@ -85,8 +85,16 @@ public:
 	void setExposure(float exposure); ///<presume in ms
 	void setHWGamma(bool enabled);
 	void setGamma(float gamma);
+	void setAutoExposure(bool autoExposure);
+	void setAutoGain(bool autoGain);
+	float getGain();
+	float getExposure();
+	bool getAutoExposure();
+	bool getAutoGain();
+	HIDS getCameraHandle() const;
 
 	bool capture();
+
 
 	////
 	//ofBaseVideoDraws

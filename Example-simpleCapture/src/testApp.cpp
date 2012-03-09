@@ -72,6 +72,9 @@ void testApp::setup(){
 	cout << camera.getSensor().toString();
 	//
 	////
+
+	camera.setExposure(70);
+	this->updateGainAndExposure();
 }
 
 //--------------------------------------------------------------
@@ -79,6 +82,9 @@ void testApp::update(){
 	//update blocks the current thread whilst the capture is being performed
 	//best to double buffer it against an image processing thread
 	camera.update();
+
+	if (ofGetFrameNum() % 100 == 0)
+		this->updateGainAndExposure();
 }
 
 //--------------------------------------------------------------
@@ -105,7 +111,7 @@ void testApp::draw(){
 	drawString("resolution = " + ofToString(camera.getWidth(),0) + "x" + ofToString(camera.getHeight(),0), y);
 	drawString("", y);
 	drawString("[f] = fullscreen", y);
-	drawString("[o] = optimise pixel clock (takes 4 seconds)", y);
+	drawString("[o] = optimise pixel clock (takes 4 seconds, or more if there's a problem)", y);
 	drawString("[s] = toggle scale to window " + string(scaleToWindow ? "[x]" : "[ ]"), y);
 	drawString("[d] = toggle draw " + string(enableDraw ? "[x]" : "[ ]"), y);
 	drawString("[9] = set pixel clock speed to 96MHz", y);	
@@ -113,6 +119,10 @@ void testApp::draw(){
 	drawString("[m] = reinitialise in mono mode", y);	
 	drawString("[b] = reinitialise in bayer mode (colour cameras only)", y);	
 	drawString("[c] = reinitialise in colour mode (colour cameras only)", y);	
+	drawString("", y);
+	drawString("[UP] / [DOWN] = change exposure (" + ofToString(this->exposure) + ", auto=" + (this->exposureAuto ? "true" : "false") + ")", y);
+	drawString("[LEFT] / [RIGHT] = change gain (" + ofToString(this->gain) + ", auto=" + (this->gainAuto ? "true" : "false") + ")", y);
+
 }
 
 //--------------------------------------------------------------
@@ -139,44 +149,34 @@ void testApp::keyPressed(int key){
 		camera.init(1, IS_SET_CM_BAYER);
 	if (key == 'c')
 		camera.init(1, IS_SET_CM_RGB8);
+
+	if (key == OF_KEY_LEFT)
+		nudgeGain(-10);
+	if (key == OF_KEY_RIGHT)
+		nudgeGain(+10);
+
+	if (key == OF_KEY_UP)
+		nudgeExposure(+5);
+	if (key == OF_KEY_DOWN)
+		nudgeExposure(-5);
 }
 
-//--------------------------------------------------------------
-void testApp::keyReleased(int key){
-
+//---------
+void testApp::updateGainAndExposure() {
+	this->gain = camera.getGain();
+	this->exposure = camera.getExposure();
+	this->gainAuto = camera.getAutoGain();
+	this->exposure = camera.getAutoExposure();
 }
 
-//--------------------------------------------------------------
-void testApp::mouseMoved(int x, int y ){
-
+//---------
+void testApp::nudgeExposure(float amount) {
+	camera.setExposure(exposure + amount);
+	updateGainAndExposure();
 }
 
-//--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mouseReleased(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
-
-}
-
-//--------------------------------------------------------------
-void testApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void testApp::dragEvent(ofDragInfo dragInfo){ 
-
+//---------
+void testApp::nudgeGain(float amount) {
+	camera.setGain(gain + amount);
+	this->updateGainAndExposure();
 }

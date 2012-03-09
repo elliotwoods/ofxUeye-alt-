@@ -363,7 +363,7 @@ void ofxUeye::setGain(float gain) {
 	is_SetAutoParameter(this->hCam, IS_SET_ENABLE_AUTO_GAIN, &pval1, 0);
 
 	int parameter = gain * 100.0f;
-	is_SetHWGainFactor(this->hCam, IS_GET_MASTER_GAIN_FACTOR, parameter);
+	is_SetHWGainFactor(this->hCam, IS_SET_MASTER_GAIN_FACTOR, parameter);
 }
 
 void ofxUeye::setExposure(float exposure) {
@@ -434,7 +434,8 @@ float ofxUeye::getGain() {
 		return 0.0f;
 	}
 
-	return (float)is_SetHWGainFactor(this->hCam, IS_GET_MASTER_GAIN, 0) / 100.0f;
+	double param;
+	return (float)is_SetHWGainFactor(this->hCam, IS_GET_MASTER_GAIN_FACTOR, 0) / 100.0f;
 }
 
 float ofxUeye::getExposure() {

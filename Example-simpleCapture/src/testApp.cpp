@@ -54,10 +54,10 @@ void testApp::setup(){
 	//
 
 	//a. use first camera
-	//camera.init(640, 480);
+	camera.init();
 
 	//b. use specfic camera ID. uEye ID's start at 1
-	camera.init(1);
+	//camera.init(1);
 
 	//c. use a specific device from the camera list
 	//camera.init(deviceList[0]);
@@ -73,7 +73,6 @@ void testApp::setup(){
 	//
 	////
 
-	camera.setExposure(70);
 	this->updateGainAndExposure();
 }
 
@@ -171,12 +170,14 @@ void testApp::updateGainAndExposure() {
 
 //---------
 void testApp::nudgeExposure(float amount) {
-	camera.setExposure(exposure + amount);
+	exposure += amount;
+	camera.setExposure(exposure);
 	updateGainAndExposure();
 }
 
 //---------
 void testApp::nudgeGain(float amount) {
-	camera.setGain(gain + amount);
+	gain += amount;
+	camera.setGain(gain);
 	this->updateGainAndExposure();
 }

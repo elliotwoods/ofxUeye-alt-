@@ -81,8 +81,8 @@ public:
 	void setPixelClock(int speedMHz);
 	int getPixelClock() const;
 
-	void setGain(float gain); //set gain as a percentage
-	void setExposure(float exposure); //presume in ms
+	void setGain(float gain); ///<set gain as a ratio 0..1
+	void setExposure(float exposure); ///<presume in ms
 	void setHWGamma(bool enabled);
 	void setGamma(float gamma);
 

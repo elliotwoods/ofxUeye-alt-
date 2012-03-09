@@ -243,7 +243,7 @@ bool ofxUeye::init(const ofxUeyeDevice& device, int colorMode) {
 void ofxUeye::close() {
 	if (!this->isOpen())
 		return;
-	ofLogNotice() << "ofxUeye::close : closing camera " << hCam;
+	ofLogNotice() << "ofxUeye::close : closing camera " << (this->cameraID);
 	is_ExitCamera(hCam);
 	this->open = false;
 }
@@ -359,7 +359,7 @@ void ofxUeye::setGain(float gain) {
 	}
 
 	int parameter = gain * 100.0f;
-	is_SetHWGainFactor(this->hCam, gain, parameter);
+	is_SetHWGainFactor(this->hCam, IS_GET_MASTER_GAIN_FACTOR, parameter);
 }
 
 void ofxUeye::setExposure(float exposure) {

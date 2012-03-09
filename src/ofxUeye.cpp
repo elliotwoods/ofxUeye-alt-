@@ -366,11 +366,7 @@ void ofxUeye::setExposure(float exposure) {
 	if (!this->isOpen()) {
 		ofLogError() << "ofxUeye::setExposure: no device intialised, call ofxUeye::init first please";
 		return;
-	}
-
-	//just to note. the old 'obsolete' IDS function was sensible
-	//this one is simply stupid. IDS have fucking idiots in their SDK team
-	
+	}	
 	//first we check whether fine shutter is supported
 	double parameter = exposure;
 	is_Exposure(this->hCam, IS_EXPOSURE_CMD_SET_EXPOSURE, &parameter, sizeof(parameter));

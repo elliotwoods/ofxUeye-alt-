@@ -37,6 +37,10 @@ string ofxUeyeDevice::toString() const {
 	output << this->status;
 	return output.str();
 }
+
+bool ofxUeyeDevice::operator<(const ofxUeyeDevice & other) const {
+	return this->cameraID < other.cameraID;
+}
 //
 //---------------------------------------------------------------
 
@@ -120,6 +124,7 @@ ofxUeye::ofxUeye() {
 	this->useTexture = true;
 	this->color = false;
 	this->open = false;
+	this->rotation = 0;
 }
 
 ofxUeye::~ofxUeye() {
@@ -163,6 +168,7 @@ vector<ofxUeyeDevice> ofxUeye::getDeviceList() {
 			UEYE_CAMERA_INFO& info(list->uci[i]);
 			devices.push_back(ofxUeyeDevice(list->uci[i]));
 		}
+		std::sort( devices.begin(), devices.end() );
 
 	} catch (...) {
 		ofLogError() << "ofxUeye::getDevies() error whilst enumerating cameras.";
@@ -296,6 +302,15 @@ int ofxUeye::getSensorHeight() const {
 
 ////
 //set properties
+void ofxUeye::setRotation(int rotation) {
+	this->rotation = rotation;
+	this->allocate();
+}
+
+int ofxUeye::getRotation() const {
+	return this->rotation;
+}
+
 float ofxUeye::setOptimalCameraTiming() {
 	if (!this->isOpen()) {
 		ofLogError() << "ofxUeye::setOptimalCameraTiming : no device intialised, call ofxUeye::init first please";
@@ -494,8 +509,12 @@ bool ofxUeye::capture() {
 		ofLogWarning("ofxUeye") << "cannot capture on camera ID " << cameraID << " as another capture is already in progress";
 		break;
 	}
+
+	if (this->rotation != 0)
+		this->pixels.rotate90To(this->rotated, this->rotation);
+
 	if (this->useTexture)
-		texture.loadData(pixels);
+		texture.loadData(this->getPixelsRef());
 
 	return error == IS_SUCCESS;
 }
@@ -517,11 +536,11 @@ void ofxUeye::draw(float x, float y, float w, float h) {
 }
 
 float ofxUeye::getWidth() {
-	return pixels.getWidth();
+	return this->getPixelsRef().getWidth();
 }
 
 float ofxUeye::getHeight() {
-	return pixels.getHeight();
+	return this->getPixelsRef().getHeight();
 }
 
 void ofxUeye::update() {
@@ -529,11 +548,17 @@ void ofxUeye::update() {
 }
 
 unsigned char* ofxUeye::getPixels() {
-	return this->pixels.getPixels();
+	if (this->rotation != 0)
+		return this->rotated.getPixels();
+	else
+		return this->pixels.getPixels();
 }
 
 ofPixels& ofxUeye::getPixelsRef() {
-	return this->pixels;
+	if (this->rotation != 0)
+		return this->rotated;
+	else
+		return this->pixels;
 }
 
 bool ofxUeye::isFrameNew() {
@@ -567,8 +592,15 @@ void ofxUeye::allocate() {
 	int height = this->sensor.height;
 
 	this->pixels.allocate(width, height, this->color ? OF_PIXELS_RGB : OF_PIXELS_MONO);
+
+	if (this->rotation != 0) {
+		if (rotation % 2 != 0)
+			std::swap(width, height);
+		this->rotated.allocate(width, height, this->color ? OF_PIXELS_RGB : OF_PIXELS_MONO);
+	}
+
 	if (useTexture) {
-		this->texture.allocate(width, height, this->color ? GL_RGB : GL_LUMINANCE);
+		this->texture.allocate(this->getPixelsRef());
 		this->texture.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 	}
 }

@@ -36,10 +36,7 @@ void ofxUeyeThreaded::initBase() {
 	this->camera.setUseTexture(false);
 	
 	camera.capture();
-	pixels = camera.getPixelsRef();
-	texture.allocate(pixels);
-	this->width = pixels.getWidth();
-	this->height = pixels.getHeight();
+	this->allocate();
 
 	this->startThread(true, false);
 }
@@ -58,6 +55,12 @@ void ofxUeyeThreaded::copyPixelsTo(ofPixels& pixels) {
 	this->unlock();
 }
 
+void ofxUeyeThreaded::allocate() {
+	pixels = camera.getPixelsRef();
+	texture.allocate(this->pixels);
+	this->width = pixels.getWidth();
+	this->height = pixels.getHeight();
+}
 void ofxUeyeThreaded::draw(float x, float y) {
 	this->texture.draw(x, y);
 }
@@ -125,6 +128,8 @@ const ofxUeye& ofxUeyeThreaded::getCamera() const {
 
 void ofxUeyeThreaded::apply(const ofxUeyePreset& preset) {
 	preset.apply(this->getCamera());
+	if ( this->getCamera().getWidth() != this->getWidth() || this->getCamera().getHeight() != this->getHeight() )
+		this->allocate();
 }
 
 void ofxUeyeThreaded::getFreshFrame() {

@@ -12,6 +12,7 @@ public:
 	void close();
 	void copyPixelsTo(ofPixels& pixels);
 	
+	void allocate();
 	ofxUeye& getCamera();
 	const ofxUeye& getCamera() const;
 	void apply(const ofxUeyePreset& preset);

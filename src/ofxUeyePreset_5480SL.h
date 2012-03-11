@@ -11,5 +11,6 @@ public:
 		camera.setGain(0.0f);
 		camera.setHWGamma(false);
 		camera.setGamma(1.0f);
+		camera.setRotation(-1);
 	}
 };

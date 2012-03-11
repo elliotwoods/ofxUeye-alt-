@@ -13,6 +13,7 @@
 #include "uEye.h"
 
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -20,6 +21,7 @@ struct ofxUeyeDevice {
 	ofxUeyeDevice();
 	ofxUeyeDevice(const UEYE_CAMERA_INFO& info);
 	string toString() const;
+	bool operator<(const ofxUeyeDevice & other) const;
 
 	DWORD cameraID;
 	DWORD deviceID;
@@ -76,6 +78,9 @@ public:
 	const ofxUeyeSensor& getSensor() const;
 	int getSensorWidth() const;
 	int getSensorHeight() const;
+	
+	void setRotation(int rotation); ///<rotate by n 90 degree rotations
+	int getRotation() const;
 
 	float setOptimalCameraTiming(); ///<returns fps
 	void setPixelClock(int speedMHz);
@@ -128,6 +133,8 @@ protected:
 
 	void allocate();
 	ofPixels pixels;
+	int rotation;
+	ofPixels rotated;
 	bool useTexture;
 	bool color;
 	ofTexture texture;

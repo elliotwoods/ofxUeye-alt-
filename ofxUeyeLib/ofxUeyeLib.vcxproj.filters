@@ -31,10 +31,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\libs\ueye\lib\win32\uEye_api.lib">
-      <Filter>lib</Filter>
-    </Library>
-    <Library Include="..\libs\ueye\lib\win32\uEye_api_64.lib">
+    <Library Include="C:\Program Files\IDS\uEye\Develop\Lib\uEye_api.lib">
       <Filter>lib</Filter>
     </Library>
   </ItemGroup>

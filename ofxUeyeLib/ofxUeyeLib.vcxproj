@@ -25,8 +25,7 @@
     <ClInclude Include="..\src\ofxUeyeThreaded.h" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\libs\ueye\lib\win32\uEye_api.lib" />
-    <Library Include="..\libs\ueye\lib\win32\uEye_api_64.lib" />
+    <Library Include="C:\Program Files\IDS\uEye\Develop\Lib\uEye_api.lib" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C48B2CCF-FA1D-405A-8362-B516399D7013}</ProjectGuid>
@@ -44,6 +43,9 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='RemoteDebug|Win32'">
+    <ConfigurationType>Application</ConfigurationType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

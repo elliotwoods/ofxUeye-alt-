@@ -4,14 +4,7 @@ Capture frames from a uEye camera device
 
 # Other ofxUeye
 
-Paulo Barcelos created a nifty ofxUeye at 
-https://github.com/paulobarcelos/ofxUeye/
-
-I suggest checking there first.
-
-Paulo's implementation of uEye is much more complete than mine. But doesn't handle multiple cameras (as far as I can see).
-
-Here i'm designing for structured light capture (non-motion), so things like continuous capture and binning aren't really of interest to me.
+Paulo Barcelos created a nifty ofxUeye at  https://github.com/paulobarcelos/ofxUeye/, I suggest checking there first.
 
 # Does not support
 
@@ -19,7 +12,6 @@ Here i'm designing for structured light capture (non-motion), so things like con
 * Triggering (although I really wwant this, again I'd need to work with MFC windows events)
 * Binning
 * AOI
-* 
 
 # Future development
 

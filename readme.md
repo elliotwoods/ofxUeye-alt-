@@ -21,7 +21,5 @@ ofxUeye-alt will be rewritten to implement ofxMachineVision in the future.
 
 I'd have to say that IDS did a superbly awful job of making an API. They really need:
 
-1. A C++ API (if currently you need to use the windows mfc api, then this shouldn't be a problem).
-2. To get rid of functions that perform multiple tasks (e.g. get and set in one function, where return arguments can mean either error codes on set or result of get?)
-3. Proper exceptions
-4. Better documentation, cleaner samples (lots of console samples please!)
+1. To get rid of functions that perform multiple tasks (e.g. get and set in one function, where return arguments can mean either error codes on set or result of get?)
+2. Better documentation, cleaner samples (lots of console samples please!)

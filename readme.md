@@ -2,6 +2,9 @@
 
 Capture frames from a uEye camera device
 
+# License
+MIT license [http://opensource.org/licenses/MIT]
+
 # Other ofxUeye
 
 Paulo Barcelos created a nifty ofxUeye at  https://github.com/paulobarcelos/ofxUeye/, I suggest checking there first.

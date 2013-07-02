@@ -3,7 +3,7 @@
 Capture frames from a uEye camera device
 
 # License
-MIT license [http://opensource.org/licenses/MIT]
+MIT license (http://opensource.org/licenses/MIT)
 
 # Other ofxUeye
 
